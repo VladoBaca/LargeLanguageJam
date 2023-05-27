@@ -8,7 +8,6 @@ setup(
     author="HHJV",
     py_modules=["main"],
     install_requires=[
-        "sqlite3",
         "requests",
     ],
     tests_require=["pytest", "pytest-mock"],
