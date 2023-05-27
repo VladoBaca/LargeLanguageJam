@@ -27,6 +27,18 @@ class DBModel:
         except sqlite3.DatabaseError as ex:
             logging.warning(f"Could not select records: {ex}")
 
+    def select_perturbance(self, sentence_id: int) -> Optional[str]:
+        try:
+            with self.connection as cursor:
+                query = "SELECT text FROM perturbations WHERE sentence_id = ?"
+                vals = [sentence_id]
+                cursor.execute(query, tuple(vals))
+                results = cursor.fetchall()
+
+                return results[0]['text'] if len(results) > 0 else None
+        except sqlite3.DatabaseError as ex:
+            logging.warning(f"Could not select perturbance: {ex}")
+
     def insert_sentence(self, text: str, language: str = "en", topic: Optional[int] = None):
         query = f"INSERT INTO sentences (text, language, topic_id) VALUES (?, ?, ?)"
 
@@ -36,12 +48,12 @@ class DBModel:
         except sqlite3.DatabaseError as ex:
             logger.error(ex)
 
-    def insert_perturbance(self, sentence_id: int, text: str):
-        query = f"INSERT INTO perturbances (sentence_id, text) VALUES (?, ?)"
+    def insert_perturbance(self, sentence_id: int, text: str, model: str):
+        query = f"INSERT INTO perturbations (sentence_id, text, model) VALUES (?, ?, ?)"
 
         try:
             with self.connection as cursor:
-                cursor.execute(query, (sentence_id, text))
+                cursor.execute(query, (sentence_id, text, model))
         except sqlite3.DatabaseError as ex:
             logger.error(ex)
 
@@ -49,7 +61,7 @@ class DBModel:
         self.update_table("sentences", s_id, **kwargs)
 
     def update_perturbance(self, s_id, **kwargs):
-        self.update_table("perturbances", s_id, **kwargs)
+        self.update_table("perturbations", s_id, **kwargs)
 
     def update_table(self, table_name, s_id, **kwargs):
         query = f"UPDATE {table_name} SET"
