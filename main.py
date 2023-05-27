@@ -10,7 +10,7 @@ def update_vector(sentence: sqlite3.Row):
     text = sentence["text"].split("\n")
     vector = json.dumps(get_vector(text[2]))
     db_model.update_sentence(sentence["id"], vector=vector)
-    sleep(1)
+    #sleep(1)
 
 
 def pipeline():
@@ -21,7 +21,7 @@ def pipeline():
     ]
 
     for lang in target_languages:
-        sentences = db_model.select_sentences(target_languages[0])
+        sentences = db_model.select_sentences(lang)
         for sentence in sentences:
             if sentence["vector"] is None:
                 update_vector(sentence)
