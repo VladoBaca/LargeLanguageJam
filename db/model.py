@@ -46,10 +46,10 @@ class DBModel:
             logger.error(ex)
 
     def update_sentence(self, s_id, **kwargs):
-        self.update_table("sentences", s_id, kwargs=kwargs)
+        self.update_table("sentences", s_id, **kwargs)
 
     def update_perturbance(self, s_id, **kwargs):
-        self.update_table("perturbances", s_id, kwargs=kwargs)
+        self.update_table("perturbances", s_id, **kwargs)
 
     def update_table(self, table_name, s_id, **kwargs):
         query = f"UPDATE {table_name} SET"

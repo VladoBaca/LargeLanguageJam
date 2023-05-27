@@ -3,18 +3,29 @@ import sqlite3
 
 from api.openai import get_vector
 from init import db_model
+from time import sleep
 
 
 def update_vector(sentence: sqlite3.Row):
-    vector = json.dumps(get_vector(sentence["text"]))
+    text = sentence["text"].split("\n")
+    vector = json.dumps(get_vector(text[2]))
     db_model.update_sentence(sentence["id"], vector=vector)
+    sleep(1)
 
 
 def pipeline():
-    sentences = db_model.select_sentences("cz")
-    for sentence in sentences:
-        if sentence["vector"] is None:
-            update_vector(sentence)
+    target_languages = [
+        "cs", "da", "de", "en", "es", "et", "fi",
+        "fr", "hr", "hu", "it", "lt", "lv", "mt",
+        "nl", "pl", "pt", "ro", "sk", "sl", "sv"
+    ]
+
+    for lang in target_languages:
+        sentences = db_model.select_sentences(target_languages[0])
+        for sentence in sentences:
+            if sentence["vector"] is None:
+                update_vector(sentence)
+        print(f"Language {lang} is finished.")
 
 
 if __name__ == "__main__":
