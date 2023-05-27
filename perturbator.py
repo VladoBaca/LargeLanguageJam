@@ -10,12 +10,11 @@ def perturb(text, prob=0.05, letters=string.ascii_letters):
     for idx, c in enumerate(text):
         if (not c.isspace()) and random.random() < prob:
             op = random.choice(['a', 'r', 's'])
-            match op:
-                case 'a':
-                    chars.append(get_random_char(letters))
-                    chars.append(c)
-                case 's':
-                    chars.append(get_random_char(letters))
+            if op == 'a':
+                chars.append(get_random_char(letters))
+                chars.append(c)
+            elif op == 's':
+                chars.append(get_random_char(letters))
         else:
             chars.append(c)
     return ''.join(chars)
