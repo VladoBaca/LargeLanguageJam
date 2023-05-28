@@ -8,6 +8,7 @@ setup(
     author="HHJV",
     py_modules=["main"],
     install_requires=[
+        "numpy",
         "openai",
         "requests",
     ],

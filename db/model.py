@@ -12,7 +12,7 @@ class DBModel:
         self.config = config
         self.connection = ConnManager()
 
-    def select_sentences(self, language: str = "en", topic: Optional[int] = None) -> List[str]:
+    def select_sentences(self, language: str = "en", topic: Optional[int] = None) -> List[sqlite3.Row]:
         try:
             with self.connection as cursor:
                 query = "SELECT id, text, vector FROM sentences WHERE language = ?"
@@ -27,15 +27,22 @@ class DBModel:
         except sqlite3.DatabaseError as ex:
             logging.warning(f"Could not select records: {ex}")
 
-    def select_perturbance(self, sentence_id: int) -> Optional[str]:
+    def select_perturbance(self, sentence_id: int) -> Optional[sqlite3.Row]:
         try:
             with self.connection as cursor:
-                query = "SELECT text FROM perturbations WHERE sentence_id = ?"
+                query = "SELECT text, vector FROM perturbations WHERE sentence_id = ?"
                 vals = [sentence_id]
                 cursor.execute(query, tuple(vals))
-                results = cursor.fetchall()
+                return cursor.fetchone()
+        except sqlite3.DatabaseError as ex:
+            logging.warning(f"Could not select perturbance: {ex}")
 
-                return results[0]['text'] if len(results) > 0 else None
+    def select_perturbances(self):
+        try:
+            with self.connection as cursor:
+                query = "SELECT id, text, vector FROM perturbations"
+                cursor.execute(query)
+                return cursor.fetchall()
         except sqlite3.DatabaseError as ex:
             logging.warning(f"Could not select perturbance: {ex}")
 
