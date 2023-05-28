@@ -27,13 +27,13 @@ class DBModel:
         except sqlite3.DatabaseError as ex:
             logging.warning(f"Could not select records: {ex}")
 
-    def select_perturbance(self, sentence_id: int) -> Optional[sqlite3.Row]:
+    def select_sentence_perturbations(self, sentence_id: int) -> List[sqlite3.Row]:
         try:
             with self.connection as cursor:
-                query = "SELECT text, vector FROM perturbations WHERE sentence_id = ?"
+                query = "SELECT id, text, vector, model FROM perturbations WHERE sentence_id = ?"
                 vals = [sentence_id]
                 cursor.execute(query, tuple(vals))
-                return cursor.fetchone()
+                return cursor.fetchall()
         except sqlite3.DatabaseError as ex:
             logging.warning(f"Could not select perturbance: {ex}")
 
@@ -55,12 +55,12 @@ class DBModel:
         except sqlite3.DatabaseError as ex:
             logger.error(ex)
 
-    def insert_perturbance(self, sentence_id: int, text: str, model: str):
-        query = f"INSERT INTO perturbations (sentence_id, text, model) VALUES (?, ?, ?)"
+    def insert_perturbance(self, sentence_id: int, text: str, model: str, vector):
+        query = f"INSERT INTO perturbations (sentence_id, text, model, vector) VALUES (?, ?, ?, ?)"
 
         try:
             with self.connection as cursor:
-                cursor.execute(query, (sentence_id, text, model))
+                cursor.execute(query, (sentence_id, text, model, vector))
         except sqlite3.DatabaseError as ex:
             logger.error(ex)
 

@@ -9,9 +9,14 @@ from init import db_model
 from perturbator import perturb
 
 
-def update_vector(sentence: sqlite3.Row, table="sentences"):
-    text = sentence["text"].split("\n")
+def sentence_to_vector(sentence_text):
+    text = sentence_text.split("\n")
     vector = json.dumps(get_vector(text[2]))
+    return vector
+
+
+def update_vector(sentence: sqlite3.Row, table="sentences"):
+    vector = sentence_to_vector(sentence["text"])
     db_model.update_table(table, sentence["id"], vector=vector)
 
 
@@ -22,24 +27,30 @@ def pipeline():
         "nl", "pl", "pt", "ro", "sk", "sl", "sv"
     ]
 
-    prob = 0.05
+    probs = [0.05, 0.1, 0.2, 0.3]
 
     for lang in target_languages:
+        print(f"Starting lang {lang}")
         sentences = db_model.select_sentences(lang)
         for sentence in sentences:
             if sentence["vector"] is None:
                 update_vector(sentence)
-                
-            perturbance = db_model.select_perturbance(sentence["id"])
-            if perturbance is None:
-                db_model.insert_perturbance(sentence["id"], perturb(sentence["text"], prob), f"prob{prob}")
-
+            perturbations = db_model.select_sentence_perturbations(sentence["id"])
+            model_perturbations = {p["model"]: p for p in perturbations}
+            for prob in probs:
+                prob_key = f"prob{prob}"
+                if prob_key in model_perturbations:
+                    perturbation = model_perturbations[prob_key]
+                    if perturbation["vector"] is None:
+                        update_vector(perturbation, table="perturbations")
+                else:
+                    perturbed_text = perturb(sentence["text"], prob)
+                    vector = sentence_to_vector(perturbed_text)
+                    db_model.insert_perturbance(sentence["id"], perturbed_text, prob_key, vector)
+            print(f"Sentence {sentence['id']} finished.")
         print(f"Language {lang} is finished.")
+        print()
 
-    sentences = db_model.select_sentences("cs")
-    for sentence in sentences:
-        if sentence["vector"] is None:
-            update_vector(sentence)
 
 def sim(vec1: List[float], vec2: List[float]):
     return dot(vec1, vec2) / (norm(vec1) * norm(vec2))
@@ -78,11 +89,11 @@ def comparations():
 
 
 if __name__ == "__main__":
-    #pipeline()
+    pipeline()
 
     # update perturbation vectors
     #for pert in db_model.select_perturbances():
     #    if pert["vector"] is None:
     #        update_vector(pert, table="perturbations")
 
-    print(comparations())
+    #print(comparations())
