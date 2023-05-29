@@ -98,3 +98,6 @@ ENV/
 
 # gcloud
 .gcloud.*.yaml
+
+# Config
+config/config.yaml
