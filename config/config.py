@@ -8,7 +8,7 @@ class Config(collections.UserDict):
     def __init__(self):
         current_dir = os.path.dirname(os.path.realpath(__file__))
         data = yaml.load(
-            open(os.path.join(current_dir, "config.yaml")), Loader=yaml.FullLoader
+            open(os.path.join(current_dir, "app_config.yaml")), Loader=yaml.FullLoader
         )
         for key in data.keys():
             self._replace_env_vars(data[key])

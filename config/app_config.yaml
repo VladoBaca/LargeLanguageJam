@@ -1,0 +1,8 @@
+main:
+  env: $ENV_NAME, env
+
+openai_api:
+  url: $OPENAI_API
+
+logger:
+  level: INFO
